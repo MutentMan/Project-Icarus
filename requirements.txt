@@ -1,0 +1,10 @@
+aiohttp
+asyncio
+rich
+phonenumbers
+PyYAML
+requests
+colorama
+beautifulsoup4
+dnspython
+duckduckgo_search
