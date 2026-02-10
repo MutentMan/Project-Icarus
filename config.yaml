@@ -1,0 +1,25 @@
+# Project Icarus Configuration
+# Please fill in your API keys below
+
+api_keys:
+  haveibeenpwned: "YOUR_HIBP_API_KEY"
+  numverify: "YOUR_NUMVERIFY_API_KEY"
+
+modules:
+  email_search:
+    enabled: true
+    concurrency_limit: 10
+  phone_search:
+    enabled: true
+  social_search:
+    enabled: true
+    sites_list: "modules/data.json" # Path to data file if needed, or hardcoded
+
+ai_engine:
+  enabled: false
+  # Standard OpenAI-compatible API endpoint (e.g. Ollama default)
+  base_url: "http://localhost:11434/v1"
+  api_key: "ollama"
+  model: "llama3"
+  # Prompt to summarize the findings
+  prompt_template: "You are an OSINT analyst. Summarize the following findings for the target: {target}. Findings: {data}"

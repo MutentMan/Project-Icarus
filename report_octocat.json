@@ -1,0 +1,42 @@
+[
+    {
+        "site": "GitHub",
+        "url": "https://github.com/octocat",
+        "exists": true
+    },
+    {
+        "site": "Instagram",
+        "url": "https://www.instagram.com/octocat",
+        "exists": true
+    },
+    {
+        "site": "Reddit",
+        "url": "https://www.reddit.com/user/octocat",
+        "exists": true
+    },
+    {
+        "site": "Pinterest",
+        "url": "https://www.pinterest.com/octocat",
+        "exists": true
+    },
+    {
+        "site": "SoundCloud",
+        "url": "https://soundcloud.com/octocat",
+        "exists": true
+    },
+    {
+        "site": "Medium",
+        "url": "https://medium.com/@octocat",
+        "exists": true
+    },
+    {
+        "site": "Spotify",
+        "url": "https://open.spotify.com/user/octocat",
+        "exists": true
+    },
+    {
+        "site": "DeviantArt",
+        "url": "https://www.deviantart.com/octocat",
+        "exists": true
+    }
+]
