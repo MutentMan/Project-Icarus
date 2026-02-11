@@ -58,10 +58,39 @@ Dig deeper! This mode extracts new leads (e.g., handles found in bios) and searc
 python core.py --input target@example.com --depth 2
 ```
 
-### Phone Number Intelligence
-Find carrier details and web mentions.
+### Full Command List
+
+| Command | Description |
+| :--- | :--- |
+| `python core.py --input <target>` | **Basic Search**: Detects type and runs standard modules. |
+| `python core.py -i <target>` | Short flag for input. |
+| `python core.py -i <target> --depth 2` | **Recursive Search**: Finds new entities and searches them (Level 2). |
+| `python core.py -i <target> -d 3` | Deep recursive search (Level 3). |
+
+### Examples
+
+**1. Email Investigation**
+Checks breaches, social accounts, and DNS records.
+```bash
+python core.py --input target@example.com
+```
+
+**2. Phone Number Investigation**
+Checks carrier, location, and web mentions.
 ```bash
 python core.py --input +14155552671
+```
+
+**3. Social Handle Investigation**
+Checks 50+ sites and scrapes profiles.
+```bash
+python core.py --input octocat
+```
+
+**4. Full Recursive Investigation**
+Ideal for deep dives. Finds an email > finds a handle > searches handle > finds a new email...
+```bash
+python core.py --input target@example.com --depth 2
 ```
 
 ---
