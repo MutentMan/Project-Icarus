@@ -86,7 +86,7 @@ with st.sidebar:
         ai_key = "ollama"
     else:
         default_url = "https://integrate.api.nvidia.com/v1"
-        default_model = "google/gemma-4-31b-it"
+        default_model = "google/gemma-2-9b-it"
         ai_key = config.get("ai_engine", {}).get("api_key", "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")
 
     ai_base_url = st.text_input("AI Base URL", value=config.get("ai_engine", {}).get("base_url", default_url))

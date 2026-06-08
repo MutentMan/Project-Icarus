@@ -20,7 +20,7 @@ ai_engine:
   provider: "nvidia"
   base_url: "https://integrate.api.nvidia.com/v1"
   api_key: "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"
-  model: "google/gemma-4-31b-it"
+  model: "google/gemma-2-9b-it"
   max_tokens: 16384
   temperature: 1.0
   top_p: 0.95
