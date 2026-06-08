@@ -24,11 +24,14 @@ async def analyze_report(target: str, findings: list, config: dict) -> str:
                            "Analyze the following OSINT data. Summarize key findings, risks, and potential connections for target: {target}.\nData: {data}")
     
     final_prompt = template.replace("{target}", target).replace("{data}", findings_str) 
+    
+    # Combined prompt for models that don't like system role or prefer merged context
+    combined_prompt = f"System: You are a professional intelligence analyst.\n\nUser: {final_prompt}"
 
     # AI Settings from config
     max_tokens = ai_config.get('max_tokens', 4096)
-    temperature = ai_config.get('temperature', 0.7)
-    top_p = ai_config.get('top_p', 1.0)
+    temperature = ai_config.get('temperature', 1.0)
+    top_p = ai_config.get('top_p', 0.95)
     
     # Call API
     headers = {
@@ -40,13 +43,13 @@ async def analyze_report(target: str, findings: list, config: dict) -> str:
     payload = {
         "model": model,
         "messages": [
-            {"role": "system", "content": "You are a professional intelligence analyst."},
-            {"role": "user", "content": final_prompt}
+            {"role": "user", "content": combined_prompt}
         ],
         "max_tokens": max_tokens,
         "temperature": temperature,
         "top_p": top_p,
-        "stream": False
+        "stream": False,
+        "chat_template_kwargs": {"enable_thinking": True}
     }
 
     try:
