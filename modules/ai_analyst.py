@@ -25,10 +25,16 @@ async def analyze_report(target: str, findings: list, config: dict) -> str:
     
     final_prompt = template.replace("{target}", target).replace("{data}", findings_str) 
 
+    # AI Settings from config
+    max_tokens = ai_config.get('max_tokens', 4096)
+    temperature = ai_config.get('temperature', 0.7)
+    top_p = ai_config.get('top_p', 1.0)
+    
     # Call API
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
+        "Authorization": f"Bearer {api_key}",
+        "Accept": "application/json"
     }
     
     payload = {
@@ -37,6 +43,9 @@ async def analyze_report(target: str, findings: list, config: dict) -> str:
             {"role": "system", "content": "You are a professional intelligence analyst."},
             {"role": "user", "content": final_prompt}
         ],
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "top_p": top_p,
         "stream": False
     }
 

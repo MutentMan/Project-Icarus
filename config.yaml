@@ -16,13 +16,13 @@ modules:
     sites_list: "modules/data.json" # Path to data file if needed, or hardcoded
 
 ai_engine:
-  enabled: false
-  provider: "ollama" # Options: "ollama", "nvidia"
-  # Base URL:
-  # Ollama: http://localhost:11434/v1
-  # NVIDIA: https://integrate.api.nvidia.com/v1
-  base_url: "http://localhost:11434/v1"
-  api_key: "ollama"
-  model: "llama3"
+  enabled: true
+  provider: "nvidia"
+  base_url: "https://integrate.api.nvidia.com/v1"
+  api_key: "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"
+  model: "google/gemma-4-31b-it"
+  max_tokens: 16384
+  temperature: 1.0
+  top_p: 0.95
   # Prompt to summarize the findings
   prompt_template: "You are an OSINT analyst. Summarize the following findings for the target: {target}. Findings: {data}"

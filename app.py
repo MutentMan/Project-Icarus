@@ -86,8 +86,8 @@ with st.sidebar:
         ai_key = "ollama"
     else:
         default_url = "https://integrate.api.nvidia.com/v1"
-        default_model = "meta/llama-3.1-405b-instruct"
-        ai_key = config.get("ai_engine", {}).get("api_key", "")
+        default_model = "google/gemma-4-31b-it"
+        ai_key = config.get("ai_engine", {}).get("api_key", "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")
 
     ai_base_url = st.text_input("AI Base URL", value=config.get("ai_engine", {}).get("base_url", default_url))
     ai_key = st.text_input("AI API Key", value=ai_key, type="password")
@@ -101,6 +101,7 @@ with st.sidebar:
         config["ai_engine"]["base_url"] = ai_base_url
         config["ai_engine"]["api_key"] = ai_key
         config["ai_engine"]["model"] = ai_model
+        config["ai_engine"]["max_tokens"] = 16384 # Keep as hidden/static for now or allow more if needed
         save_config(config)
         st.success("Config Saved!")
 
