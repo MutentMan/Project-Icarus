@@ -16,14 +16,21 @@ def search_web(query: str, config: dict = None, max_results=5, site_filter=None)
             # text search
             ddg_results = list(ddgs.text(full_query, max_results=max_results))
             for r in ddg_results:
-                results.append({
-                    "title": r.get('title'),
-                    "href": r.get('href'),
-                    "body": r.get('body')
-                })
+                title = r.get('title', '')
+                body = r.get('body', '')
+                href = r.get('href', '')
+                
+                # RELEVANCE FILTER: Ensure the query exists in title or snippet
+                # We normalize to lowercase for matching
+                search_term = query.lower().replace('"', '') # Clean up quotes for matching
+                if search_term in title.lower() or search_term in body.lower() or search_term in href.lower():
+                    results.append({
+                        "title": title,
+                        "href": href,
+                        "body": body
+                    })
     except Exception as e:
         # Fallback or error logging
-        # console.print(f"[red]Web Search Error: {e}[/red]")
         pass
         
     return results
