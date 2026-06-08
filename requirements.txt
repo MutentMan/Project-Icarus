@@ -8,3 +8,5 @@ colorama
 beautifulsoup4
 dnspython
 duckduckgo_search
+streamlit
+streamlit-option-menu

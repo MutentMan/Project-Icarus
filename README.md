@@ -38,16 +38,22 @@ Project Icarus is an advanced Open Source Intelligence (OSINT) tool designed to 
     ```
 
 3.  **Configuration**:
-    - Rename/Edit `config.yaml` to add your API keys.
-    - **HaveIBeenPwned**: [Get Key](https://haveibeenpwned.com/API/v3) (Optional)
-    - **NumVerify**: [Get Key](https://numverify.com/) (Optional)
+    - Use the **Settings** sidebar in the Web UI or edit `config.yaml` manually.
+    - **HaveIBeenPwned**: [Get Key](https://haveibeenpwned.com/API/v3)
+    - **NumVerify**: [Get Key](https://numverify.com/)
 
 ---
 
 ## 🛠️ Usage
 
-### Basic Search
-Perform a quick lookup on a single target.
+### Web Dashboard (Recommended)
+Launch the professional OSINT dashboard:
+```bash
+streamlit run app.py
+```
+
+### CLI Mode
+Perform a quick lookup from your terminal.
 ```bash
 python core.py --input target@example.com
 ```
@@ -58,10 +64,39 @@ Dig deeper! This mode extracts new leads (e.g., handles found in bios) and searc
 python core.py --input target@example.com --depth 2
 ```
 
-### Phone Number Intelligence
-Find carrier details and web mentions.
+### Full Command List
+
+| Command | Description |
+| :--- | :--- |
+| `python core.py --input <target>` | **Basic Search**: Detects type and runs standard modules. |
+| `python core.py -i <target>` | Short flag for input. |
+| `python core.py -i <target> --depth 2` | **Recursive Search**: Finds new entities and searches them (Level 2). |
+| `python core.py -i <target> -d 3` | Deep recursive search (Level 3). |
+
+### Examples
+
+**1. Email Investigation**
+Checks breaches, social accounts, and DNS records.
+```bash
+python core.py --input target@example.com
+```
+
+**2. Phone Number Investigation**
+Checks carrier, location, and web mentions.
 ```bash
 python core.py --input +14155552671
+```
+
+**3. Social Handle Investigation**
+Checks 50+ sites and scrapes profiles.
+```bash
+python core.py --input octocat
+```
+
+**4. Full Recursive Investigation**
+Ideal for deep dives. Finds an email > finds a handle > searches handle > finds a new email...
+```bash
+python core.py --input target@example.com --depth 2
 ```
 
 ---
@@ -89,12 +124,13 @@ Project Icarus can use a local LLM to analyze the final report.
 
 | Module | Description |
 | :--- | :--- |
-| `core.py` | The brain. Orchestrates searches, handles recursion, and generates reports. |
-| `email_search` | checks HIBP breaches, DNS records, and social accounts linked to the email. |
-| `phone_search` | Validates numbers, checks carrier/location, and searches the web for mentions. |
-| `social_search` | Checks username availability across major sites and scrapes profiles for info. |
-| `web_search` | Uses DuckDuckGo to find public mentions and related documents. |
-| `ai_analyst` | Connects to an LLM to generate an intelligence summary. |
+| `core.py` | The brain. Orchestrates searches for CLI and UI. |
+| `app.py` | **Streamlit Dashboard**. Professional web interface. |
+| `email_search` | Checks HIBP breaches, DNS records, and social accounts. |
+| `phone_search` | Validates numbers, checks carrier, and web mentions. |
+| `social_search` | OSINT handle check across 50+ sites. |
+| `web_search` | Hunts for mentions and related documents. |
+| `ai_analyst` | AI-powered intelligence summary generator. |
 
 ---
 

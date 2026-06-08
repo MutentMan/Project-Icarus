@@ -40,11 +40,12 @@ class IcarusCore:
         if re.match(url_regex, input_str): return "url"
         return "handle"
 
-    async def process_entity(self, entity, entity_type, depth, max_depth, progress):
+    async def process_entity(self, entity, entity_type, depth, max_depth, progress_callback=None):
         if entity in self.seen_entities or depth > max_depth: return None
         self.seen_entities.add(entity)
         
-        task_id = progress.add_task(f"[cyan]Depth {depth}: Investigating {entity}...", total=None)
+        if progress_callback:
+            progress_callback(f"Investigating {entity} ({entity_type})...")
         
         results = {"entity": entity, "type": entity_type, "depth": depth}
 
@@ -77,33 +78,33 @@ class IcarusCore:
         except Exception as e:
             results["error"] = str(e)
         
-        progress.remove_task(task_id)
         return results
 
-    async def run_investigation(self, start_input, max_depth=1):
+    async def run_investigation(self, start_input, max_depth=1, progress_callback=None):
+        self.results = []
+        self.seen_entities = set()
+        self.queue = []
+        
         start_type = self.detect_type(start_input)
         self.queue.append((start_input, start_type, 0))
 
-        with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
-            while self.queue:
-                current_entity, current_type, current_depth = self.queue.pop(0)
-                if current_depth > max_depth: continue
-                
-                result = await self.process_entity(current_entity, current_type, current_depth, max_depth, progress)
-                if result:
-                    self.results.append(result)
+        while self.queue:
+            current_entity, current_type, current_depth = self.queue.pop(0)
+            if current_depth > max_depth: continue
+            
+            result = await self.process_entity(current_entity, current_type, current_depth, max_depth, progress_callback)
+            if result:
+                self.results.append(result)
 
-        self.display_identity_graph()
-        
         # AI Analysis
         if self.config.get('ai_engine', {}).get('enabled'):
-             with console.status("[bold green]Running AI Analysis..."):
-                 ai_summary = await ai_analyst.analyze_report(start_input, self.results, self.config)
-                 if ai_summary:
-                     console.print(Panel(Markdown(ai_summary), title="AI Analyst Insight", style="white"))
-                     self.results.append({"type": "ai_summary", "data": ai_summary})
+             if progress_callback: progress_callback("Running AI Analysis...")
+             ai_summary = await ai_analyst.analyze_report(start_input, self.results, self.config)
+             if ai_summary:
+                 self.results.append({"type": "ai_summary", "data": ai_summary})
 
         self.save_reports(start_input)
+        return self.results
 
     def display_identity_graph(self):
         console.print(Panel("[bold]Identity Graph Analysis[/bold]", style="magenta"))
@@ -158,7 +159,9 @@ async def main():
     args = parser.parse_args()
 
     icarus = IcarusCore()
+    # For CLI, we can use a simple print as progress_callback if we want, or just leave None
     await icarus.run_investigation(args.input, args.depth)
+    icarus.display_identity_graph()
 
 if __name__ == "__main__":
     if sys.platform == 'win32':
