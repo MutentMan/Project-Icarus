@@ -17,7 +17,10 @@ modules:
 
 ai_engine:
   enabled: false
-  # Standard OpenAI-compatible API endpoint (e.g. Ollama default)
+  provider: "ollama" # Options: "ollama", "nvidia"
+  # Base URL:
+  # Ollama: http://localhost:11434/v1
+  # NVIDIA: https://integrate.api.nvidia.com/v1
   base_url: "http://localhost:11434/v1"
   api_key: "ollama"
   model: "llama3"

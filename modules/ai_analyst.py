@@ -12,6 +12,7 @@ async def analyze_report(target: str, findings: list, config: dict) -> str:
     if not ai_config.get('enabled', False):
         return None
 
+    provider = ai_config.get('provider', 'ollama')
     base_url = ai_config.get('base_url', 'http://localhost:11434/v1').rstrip('/')
     api_key = ai_config.get('api_key', 'ollama')
     model = ai_config.get('model', 'llama3')
@@ -42,16 +43,17 @@ async def analyze_report(target: str, findings: list, config: dict) -> str:
     try:
         loop = asyncio.get_event_loop()
         url = f"{base_url}/chat/completions"
-        response = await loop.run_in_executor(None, lambda: requests.post(url, headers=headers, json=payload, timeout=60))
+        # Increased timeout for cloud models
+        response = await loop.run_in_executor(None, lambda: requests.post(url, headers=headers, json=payload, timeout=90))
         
         if response.status_code == 200:
             result = response.json()
             return result['choices'][0]['message']['content']
         else:
-            return f"AI Error: API returned {response.status_code}"
+            return f"AI Error ({provider}): API returned {response.status_code} - {response.text}"
             
     except Exception as e:
-        return f"AI Connection Failed: {str(e)}"
+        return f"AI Connection Failed ({provider}): {str(e)}"
 
 if __name__ == "__main__":
     pass

@@ -78,12 +78,28 @@ with st.sidebar:
     
     st.subheader("AI Engine")
     ai_enabled = st.checkbox("Enable AI Analyst", value=config.get("ai_engine", {}).get("enabled", False))
-    ai_model = st.selectbox("AI Model", ["llama3", "gpt-3.5-turbo", "gpt-4"], index=0)
+    ai_provider = st.selectbox("AI Provider", ["ollama", "nvidia"], index=0 if config.get("ai_engine", {}).get("provider") == "ollama" else 1)
+    
+    if ai_provider == "ollama":
+        default_url = "http://localhost:11434/v1"
+        default_model = "llama3"
+        ai_key = "ollama"
+    else:
+        default_url = "https://integrate.api.nvidia.com/v1"
+        default_model = "meta/llama-3.1-405b-instruct"
+        ai_key = config.get("ai_engine", {}).get("api_key", "")
+
+    ai_base_url = st.text_input("AI Base URL", value=config.get("ai_engine", {}).get("base_url", default_url))
+    ai_key = st.text_input("AI API Key", value=ai_key, type="password")
+    ai_model = st.text_input("AI Model", value=config.get("ai_engine", {}).get("model", default_model))
     
     if st.button("Save Configuration"):
         config["api_keys"] = {"haveibeenpwned": hibp_key, "numverify": numverify_key}
         if "ai_engine" not in config: config["ai_engine"] = {}
         config["ai_engine"]["enabled"] = ai_enabled
+        config["ai_engine"]["provider"] = ai_provider
+        config["ai_engine"]["base_url"] = ai_base_url
+        config["ai_engine"]["api_key"] = ai_key
         config["ai_engine"]["model"] = ai_model
         save_config(config)
         st.success("Config Saved!")
