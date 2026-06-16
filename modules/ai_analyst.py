@@ -29,7 +29,8 @@ async def analyze_report(target: str, findings: list, config: dict) -> str:
     combined_prompt = f"System: You are a professional intelligence analyst.\n\nUser: {final_prompt}"
 
     # AI Settings from config
-    max_tokens = ai_config.get('max_tokens', 4096)
+    max_tokens = ai_config.get('max_tokens', 16384)
+    reasoning_budget = ai_config.get('reasoning_budget', 16384)
     temperature = ai_config.get('temperature', 1.0)
     top_p = ai_config.get('top_p', 0.95)
     
@@ -49,18 +50,27 @@ async def analyze_report(target: str, findings: list, config: dict) -> str:
         "temperature": temperature,
         "top_p": top_p,
         "stream": False,
-        "chat_template_kwargs": {"enable_thinking": True}
+        "chat_template_kwargs": {"enable_thinking": True},
+        "reasoning_budget": reasoning_budget
     }
 
     try:
         loop = asyncio.get_event_loop()
         url = f"{base_url}/chat/completions"
-        # Increased timeout for cloud models
-        response = await loop.run_in_executor(None, lambda: requests.post(url, headers=headers, json=payload, timeout=90))
+        # Increased timeout for massive models
+        response = await loop.run_in_executor(None, lambda: requests.post(url, headers=headers, json=payload, timeout=120))
         
         if response.status_code == 200:
             result = response.json()
-            return result['choices'][0]['message']['content']
+            message = result['choices'][0]['message']
+            
+            # Extract reasoning if available
+            reasoning = message.get('reasoning_content') or message.get('reasoning')
+            content = message.get('content', '')
+            
+            if reasoning:
+                return f"### AI Reasoning Process\n{reasoning}\n\n---\n\n### Intelligence Summary\n{content}"
+            return content
         else:
             return f"AI Error ({provider}): API returned {response.status_code} - {response.text}"
             

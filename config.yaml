@@ -19,9 +19,10 @@ ai_engine:
   enabled: true
   provider: "nvidia"
   base_url: "https://integrate.api.nvidia.com/v1"
-  api_key: "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"
-  model: "google/gemma-4-31b-it"
+  api_key: "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"
+  model: "nvidia/nemotron-3-ultra-550b-a55b"
   max_tokens: 16384
+  reasoning_budget: 16384
   temperature: 1.0
   top_p: 0.95
   # Prompt to summarize the findings

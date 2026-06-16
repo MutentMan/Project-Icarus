@@ -86,8 +86,8 @@ with st.sidebar:
         ai_key = "ollama"
     else:
         default_url = "https://integrate.api.nvidia.com/v1"
-        default_model = "google/gemma-4-31b-it"
-        ai_key = config.get("ai_engine", {}).get("api_key", "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")
+        default_model = "nvidia/nemotron-3-ultra-550b-a55b"
+        ai_key = config.get("ai_engine", {}).get("api_key", "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")
 
     ai_base_url = st.text_input("AI Base URL", value=config.get("ai_engine", {}).get("base_url", default_url))
     ai_key = st.text_input("AI API Key", value=ai_key, type="password")
@@ -101,7 +101,8 @@ with st.sidebar:
         config["ai_engine"]["base_url"] = ai_base_url
         config["ai_engine"]["api_key"] = ai_key
         config["ai_engine"]["model"] = ai_model
-        config["ai_engine"]["max_tokens"] = 16384 # Keep as hidden/static for now or allow more if needed
+        config["ai_engine"]["max_tokens"] = 16384
+        config["ai_engine"]["reasoning_budget"] = 16384
         save_config(config)
         st.success("Config Saved!")
 
@@ -137,55 +138,48 @@ if st.button("Launch Investigation", use_container_width=True):
             status_text.text("Investigation Complete!")
 
         # Tabs for Results
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Summary", "👤 Social Identity", "📄 Documents", "🌐 Web Mentions", "🧠 AI Insight"])
+        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+            "📊 Summary", "👤 Social Identity", "📄 Documents", 
+            "🌐 Identity Graph", "🧠 AI Insight", "🛠️ Manual Toolkit"
+        ])
         
         with tab1:
             st.header("Investigation Summary")
             st.json(results)
             
         with tab2:
-            st.header("Social Media Profiles")
-            for item in results:
-                if item.get("type") in ["social_handle", "url_handle"]:
-                    data = item.get("data", [])
-                    if isinstance(data, list):
-                        for profile in data:
-                            if profile.get("exists"):
-                                st.write(f"✅ **{profile['site']}**: [{profile['url']}]({profile['url']})")
-                
-                # Check for social links found via email dorks
-                if item.get("type") == "email":
-                    conns = item.get("data", {}).get("social_media_connections", [])
-                    for conn in conns:
-                        st.write(f"🔗 **{conn['platform']}**: [{conn['url']}]({conn['url']})")
+            st.header("Social Identities")
+            social_entries = [r for r in results if r["type"] == "handle"]
+            if social_entries:
+                for entry in social_entries:
+                    st.subheader(f"Handle: {entry['entity']}")
+                    for site in entry["data"]:
+                        if site["exists"]:
+                            st.success(f"**[{site['site']}]({site['url']})** - {site.get('title', 'N/A')}")
+            else:
+                st.info("No social handles discovered in this search.")
 
         with tab3:
-            st.header("Related Documents")
-            found_docs = False
-            for item in results:
-                if "documents" in item:
-                    for doc in item["documents"]:
-                        st.write(f"📄 **{doc['title']}**")
-                        st.write(f"   Link: {doc['href']}")
-                        found_docs = True
-            if not found_docs:
-                st.info("No documents found.")
+            st.header("Discovered Documents")
+            all_docs = []
+            for r in results:
+                if "documents" in r:
+                    all_docs.extend(r["documents"])
+            
+            if all_docs:
+                for doc in all_docs:
+                    st.write(f"### [{doc['title']}]({doc['href']})")
+                    st.write(doc['body'])
+                    st.divider()
+            else:
+                st.info("No documents found for this target.")
 
         with tab4:
-            st.header("Web Mentions")
-            for item in results:
-                # Direct handle web search
-                if item.get("type") == "social_handle":
-                    mentions = item.get("web_mentions", [])
-                    for m in mentions:
-                        st.write(f"🌐 **{m['title']}**")
-                        st.write(f"   {m['href']}")
-                # Phone mentions
-                if item.get("type") == "phone":
-                    mentions = item.get("data", {}).get("web_mentions", [])
-                    for m in mentions:
-                        st.write(f"📞 **{m['title']}**")
-                        st.write(f"   {m['href']}")
+            st.header("Identity Relationship Graph")
+            st.write("Target -> Entities Connected")
+            nodes = {r["entity"]: r["type"] for r in results if r["type"] in ["email", "phone", "handle"]}
+            st.write(nodes)
+            st.info("Tip: More advanced graph visualizations are coming soon.")
 
         with tab5:
             st.header("AI Analyst Summary")
@@ -195,11 +189,48 @@ if st.button("Launch Investigation", use_container_width=True):
             else:
                 st.info("AI Analysis was not enabled or no data returned.")
 
+        with tab6:
+            st.header("Manual Investigation Toolkit")
+            st.write("Launch manual deep-dives without requiring API keys.")
+            
+            t_type = icarus.detect_type(target_input)
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.subheader("Target-Specific Tools")
+                if t_type == "email":
+                    st.link_button("HIBP Manual Search", f"https://haveibeenpwned.com/account/{target_input}")
+                    st.link_button("Epieos Tracer", f"https://epieos.com/?q={target_input}")
+                    st.link_button("Intelligence X Search", f"https://intelx.io/?s={target_input}")
+                    st.link_button("LeakCheck Profile", f"https://leakcheck.io/profiles/{target_input}")
+                elif t_type == "phone":
+                    st.link_button("Sync.me Search", f"https://sync.me/search/?number={target_input}")
+                    st.link_button("Truecaller Search", f"https://www.truecaller.com/search/in/{target_input}")
+                elif t_type == "handle":
+                    st.link_button("WhatsMyName.app", f"https://whatsmyname.app/?q={target_input}")
+                    st.link_button("NameCheckup", f"https://namecheckup.com/search?q={target_input}")
+                    st.link_button("Social-Searcher", f"https://www.social-searcher.com/search-users/?q={target_input}")
+
+            with col2:
+                st.subheader("Global OSINT Links")
+                st.link_button("OSINT Framework", "https://osintframework.com/")
+                st.link_button("IntelTechniques", "https://inteltechniques.com/tools/index.html")
+                st.link_button("Shodan Search", f"https://www.shodan.io/search?query={target_input}")
+
+            st.divider()
+            st.info("🕵️‍♂️ **Tip**: Always use a VPN or dedicated browser profile for manual OSINT work.")
+
         # Download Report
+        st.divider()
         report_json = json.dumps(results, indent=4)
         st.download_button(
-            label="Download Full JSON Report",
+            label="💾 Download Full JSON Report",
             data=report_json,
             file_name=f"icarus_report_{target_input}.json",
             mime="application/json",
+            use_container_width=True
         )
+
+else:
+    st.info("Enter a target above and click 'Launch Investigation' to start.")
+
