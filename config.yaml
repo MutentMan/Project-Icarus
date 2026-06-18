@@ -19,7 +19,7 @@ ai_engine:
   enabled: true
   provider: "nvidia"
   base_url: "https://integrate.api.nvidia.com/v1"
-  api_key: ""
+  api_key: "nvidia_api_key"
   model: "nvidia/nemotron-3-ultra-550b-a55b"
   max_tokens: 16384
   reasoning_budget: 16384
